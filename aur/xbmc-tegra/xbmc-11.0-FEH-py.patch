@@ -1,0 +1,23 @@
+--- a/tools/Linux/FEH.py	2012-02-07 18:13:21.000000000 +1100
++++ b/tools/Linux/FEH.py	2012-02-27 08:49:45.515733162 +1100
+@@ -131,9 +131,9 @@
+         delta = finish - start
+ 
+ def badDirectRendering():
+-    out = os.popen("glxinfo | grep \"direct rendering\"", 'r')
++    out = os.popen("eglinfo | grep \"EGL client APIs:\"", 'r')
+     line = out.read()
+-    direct = "Yes" not in line
++    direct = "OpenGL_ES2" not in line
+     out.close()
+ 
+     return direct
+@@ -170,7 +170,7 @@
+         exit(0)
+ 
+     if (badDirectRendering()):
+-        error("XBMC needs hardware accelerated OpenGL rendering.\nInstall an appropriate graphics driver.\n\nPlease consult XBMC Wiki for supported hardware\nhttp://wiki.xbmc.org/?title=Supported_hardware")
++        error("XBMC needs hardware accelerated EGL rendering.\nInstall an appropriate graphics driver.\n\nPlease consult XBMC Wiki for supported hardware\nhttp://wiki.xbmc.org/?title=Supported_hardware")
+ 
+     if (badColorDepth()):
+         error("XBMC cannot run unless the\nscreen color depth is atleast 24 bit.\n\nPlease reconfigure your screen.")

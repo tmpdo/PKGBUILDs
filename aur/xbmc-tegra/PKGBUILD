@@ -4,12 +4,12 @@
 # Contributor: [vEX] <niechift.dot.vex.at.gmail.dot.com>
 # Contributor: Zeqadious <zeqadious.at.gmail.dot.com>
 # Contributor: BlackEagle < ike DOT devolder AT herecura DOT be >
-# Contributor: macau <tema.prokopenko@gmail.com> //fix issues for tegra2-based devices, hw video decoding via gles2
+# Contributor: macau <tema.prokopenko@gmail.com> //bump to 11.0_rc2
 
 _prefix=/usr
 plugrel=1
 pkgname=xbmc-tegra
-pkgver=10.1
+pkgver=11.0
 pkgrel=9
 pkgdesc="A software media player and entertainment hub for digital media"
 arch=('armv7h')
@@ -31,46 +31,41 @@ optdepends=('lirc: remote controller support'
         'lcms'
         'tk')
 install="${pkgname}.install"
-source=("http://mirrors.xbmc.org/releases/source/xbmc-$pkgver.tar.gz"
+source=("http://mirrors.xbmc.org/releases/source/xbmc-$pkgver-Eden_rc2.tar.gz"
 	'FEH.sh'
-	xbmc-10.0-python-2.7.patch
-	xbmc-10.1-gcc-4.6.patch
-	http://trac.xbmc.org/raw-attachment/ticket/11584/xbmcplugin_int_format.patch
-	gles_bgra.patch)
-md5sums=('391398126cb86a4f6fbd0b7037997d84'
+0001-Rebased-remove-asm-code-failing-on-hardfp-patch-by-a.patch
+xbmc-11.0-remove-hardcoded-arm-compiler-options.patch
+xbmc-11.0-libpng15.patch
+xbmc-11.0-FEH-py.patch)
+
+md5sums=('66ae950474aa9e70712fc820efc1cb67'
          '7127c0336f91ff48e408e2d1078fe8eb'
-         '62d46c8b44e4e5313a10922209cb14f8'
-         'd88b854d6f356a74d7658cd1f74a4695'
-         'f42aa74a982ca854491a74e960f13804'
-         '48441891ee2d210c210a34769c7938ad')
+         '13211b164d66b3ec133921b9804401a5'
+         '14598e905a3df67c702aee0a0f1dcbed'
+         'd0e71629d294ca03ee15cd44f65c2e99'
+         '3dbf26c3374fef87a8ee8222bb360e89')
 
 build() {
-  cd "${srcdir}/xbmc-$pkgver"
+  cd "${srcdir}/xbmc-$pkgver-Eden_rc2"
 #fix gles issue on tegra boards
-patch -p1 < $srcdir/gles_bgra.patch
+patch -p1 <$srcdir/0001-Rebased-remove-asm-code-failing-on-hardfp-patch-by-a.patch
+patch -p1 <$srcdir/xbmc-11.0-remove-hardcoded-arm-compiler-options.patch
+patch -p1 <$srcdir/xbmc-11.0-libpng15.patch
+patch -p1 <$srcdir/xbmc-11.0-FEH-py.patch
 
-patch -p1 <$srcdir/xbmc-10.0-python-2.7.patch
-patch -p1 <$srcdir/xbmc-10.1-gcc-4.6.patch
-  (cd xbmc/lib/libPython/xbmcmodule && patch -p5 <$srcdir/xbmcplugin_int_format.patch)
 
 LDFLAGS="-Wl,--hash-style=gnu"
-
-# fix linking issue with gcc 4.5, see git 6ea61fce78q
-sed -i 's: --soname,: -Wl,--soname,:' \
-      xbmc/cores/dvdplayer/Codecs/{,libdvd/}Makefile.in
-
+export PYTHON="/usr/bin/python2.7"
   msg "Bootstrapping XBMC"
  ./bootstrap
-
-#bad idea use softfp on hardfp system 
-sed s/softfp/hard/g -i configure
 
 #update python 
 sed s/lpython2.5/lpython2.7/g -i Makefile.in
 
   msg "Configuring XBMC"
   
- ./configure --prefix=${_prefix} --disable-vdpau --disable-pulse --disable-hal --disable-avahi --enable-external-libraries --disable-liba52 --disable-libdts --enable-external-python --disable-debug --enable-gles --disable-gl --disable-dvdcss --disable-joystick --disable-openmax --enable-tegra --disable-vaapi --disable-ccache --disable-external-ffmpeg --disable-optimizations
+  
+ ./configure --prefix=${_prefix} --disable-openmax --disable-neon --disable-vdpau --disable-pulse --disable-hal --disable-avahi --enable-external-libraries --disable-liba52 --disable-libdts --enable-external-python --disable-debug --enable-gles --disable-gl --disable-dvdcss --disable-joystick  --enable-tegra --disable-vaapi --disable-ccache --enable-external-ffmpeg --disable-optimizations --disable-optical-drive --disable-libbluray --disable-non-free --disable-faac
     
   # Now (finally) build
   msg "Running make"
@@ -80,7 +75,7 @@ sed s/lpython2.5/lpython2.7/g -i Makefile.in
 }
 
 package() {
-  cd "${srcdir}/xbmc-$pkgver"
+  cd "${srcdir}/xbmc-$pkgver-Eden_rc2"
   msg "Running make install"
   make prefix="${pkgdir}${_prefix}" install
 
@@ -93,12 +88,11 @@ package() {
   sed -i -e "s/lsb_release -a 2> \/dev\/null | sed -e 's\/\^\/    \/'/cat \/etc\/arch-release/g" "${pkgdir}${_prefix}/bin/xbmc"
 
   # .desktop files
-  install -D -m 0644 "${srcdir}/xbmc-$pkgver/tools/Linux/xbmc.desktop" "${pkgdir}${_prefix}/share/applications/xbmc.desktop"
-  install -D -m 0644 "${srcdir}/xbmc-$pkgver/tools/Linux/xbmc-48x48.png" "${pkgdir}${_prefix}/share/pixmaps/xbmc.png"
+  install -D -m 0644 "${srcdir}/xbmc-$pkgver-Eden_rc2/tools/Linux/xbmc.desktop" "${pkgdir}${_prefix}/share/applications/xbmc.desktop"
+  install -D -m 0644 "${srcdir}/xbmc-$pkgver-Eden_rc2/tools/Linux/xbmc-48x48.png" "${pkgdir}${_prefix}/share/pixmaps/xbmc.png"
 
   # Tools
-  install -D -m 0755 "${srcdir}/xbmc-$pkgver/xbmc-xrandr" "${pkgdir}${_prefix}/share/xbmc/xbmc-xrandr"
-  install -D -m 0755 "${srcdir}/xbmc-$pkgver/tools/TexturePacker/TexturePacker" "${pkgdir}${_prefix}/share/xbmc/"
+  install -D -m 0755 "${srcdir}/xbmc-$pkgver-Eden_rc2/xbmc-xrandr" "${pkgdir}${_prefix}/share/xbmc/xbmc-xrandr"
 
   # Licenses
   install -d -m 0755 "${pkgdir}${_prefix}/share/licenses/${pkgname}"
@@ -113,5 +107,9 @@ package() {
   rm -f "${pkgdir}/usr/share/icons/hicolor/icon-theme.cache"
 }
 # vim:set ts=2 sw=2 et:
+
+
+
+
 
 
