@@ -4,12 +4,12 @@ ac_add_options --prefix=/usr
 ac_add_options --libdir=/usr/lib
 
 # System libraries
-ac_add_options --with-system-nspr
-ac_add_options --with-system-nss
+ac_add_options --disable-system-nspr
+ac_add_options --disable-system-nss
 ac_add_options --with-system-jpeg
 ac_add_options --with-system-zlib
 ac_add_options --with-system-bz2
-ac_add_options --with-system-png
+ac_add_options --disable-system-png
 ac_add_options --with-system-libevent
 ac_add_options --with-system-libvpx
 ac_add_options --enable-system-hunspell
@@ -35,6 +35,11 @@ ac_add_options --disable-installer
 # Optimization
 ac_add_options --enable-optimize=-O1
 ac_add_options --with-fpu=vfpv3-d16
+ac_add_options --disable-neon
+ac_add_options --disable-necko-wifi
+ac_add_options --disable-debug-symbols
+
+ac_add_options --disable-mobile-optinizations
 
 # PGO
 ac_add_options --enable-profile-guided-optimization

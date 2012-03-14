@@ -1,0 +1,26 @@
+--- xpcom/glue/arm.h.orig	2012-03-12 12:59:45.930642393 +0000
++++ xpcom/glue/arm.h	2012-03-12 13:01:02.470641994 +0000
+@@ -145,15 +145,15 @@
+ #endif
+   }
+ 
+-#if defined(MOZILLA_PRESUME_EDSP)
+-#  define MOZILLA_MAY_SUPPORT_EDSP 1
++//#if defined(MOZILLA_PRESUME_EDSP)
++//#  define MOZILLA_MAY_SUPPORT_EDSP 1
+   inline bool supports_edsp() { return true; }
+-#elif defined(MOZILLA_MAY_SUPPORT_EDSP) \
+-   && defined(MOZILLA_ARM_HAVE_CPUID_DETECTION)
+-  inline bool supports_edsp() { return arm_private::edsp_enabled; }
+-#else
+-  inline bool supports_edsp() { return false; }
+-#endif
++//#elif defined(MOZILLA_MAY_SUPPORT_EDSP) \
++//   && defined(MOZILLA_ARM_HAVE_CPUID_DETECTION)
++//  inline bool supports_edsp() { return arm_private::edsp_enabled; }
++//#else
++//  inline bool supports_edsp() { return false; }
++//#endif
+ 
+ #if defined(MOZILLA_PRESUME_ARMV6)
+ #  define MOZILLA_MAY_SUPPORT_ARMV6 1

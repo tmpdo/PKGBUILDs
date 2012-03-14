@@ -3,7 +3,7 @@
 # Contributor macau <tema.prokopenko@gmail.com> //disable neon and simd optimizations for tegra2. need clean in future
 
 pkgname=firefox
-pkgver=10.0b5
+pkgver=11.0b8
 pkgrel=1
 pkgdesc="Standalone web browser from mozilla.org"
 arch=('armv7h')
@@ -13,31 +13,37 @@ makedepends=('unzip' 'zip' 'pkg-config' 'diffutils' 'python2' 'wireless_tools' '
 url="http://www.mozilla.org/projects/firefox"
 install=firefox.install
 source=(ftp://ftp.mozilla.org/pub/mozilla.org/firefox/releases//$pkgver/source/firefox-$pkgver.source.tar.bz2
-        mozconfig firefox.desktop firefox-install-dir.patch vendor.js remove_neon.diff)
-md5sums=('7a6cc712d941052de20e482db3df229e'
-         'bec1852f783b567b5c2a04e6776b4c2a'
+        mozconfig firefox.desktop firefox-install-dir.patch vendor.js remove_neon.diff edsp.diff Bug-722127-Bump-required-libvpx-version-to-1.0.0.-r-.patch)
+
+md5sums=('b74f26080f321914bdc8940814eaa759'
+         'd26f47ea47e01b710a493688d1e4e1b4'
          'bdeb0380c7fae30dd0ead6d2d3bc5873'
          '594523c536a9be951b52c90dd85aff18'
          '0d053487907de4376d67d8f499c5502b'
-         '78550b5563ebcf04aba9438d7d6a5cb0')
+         '78550b5563ebcf04aba9438d7d6a5cb0'
+         '1dc33ee67923091c683378678e3788d7'
+         'ef4988309e53731c6f3daf6b32f00e15')
 
 build() {
   cd "$srcdir/mozilla-beta"
 
   cp "$srcdir/mozconfig" .mozconfig
-  patch -Np1 -i "$srcdir/firefox-install-dir.patch"
+ patch -Np1 -i "$srcdir/firefox-install-dir.patch"
 
 #ALARM: dirty hack, disable neon in rgb converter for tegra2
   patch -Np0 -i "$srcdir/remove_neon.diff" 
-  
+#And edsp unusable too
+  patch -Np0 -i "$srcdir/edsp.diff"
+
+  patch -Np1 -i "$srcdir/Bug-722127-Bump-required-libvpx-version-to-1.0.0.-r-.patch"
   # Fix PRE_RELEASE_SUFFIX
   sed -i '/^PRE_RELEASE_SUFFIX := ""/s/ ""//' \
-    browser/base/Makefile.in
+  browser/base/Makefile.in
 
   export LDFLAGS="$LDFLAGS -Wl,-rpath,/usr/lib/firefox"
   export PYTHON="/usr/bin/python2"
 
-  LD_PRELOAD="" /usr/bin/Xvfb -nolisten tcp -extension GLX -screen 0 1280x1024x24 :99 &
+LD_PRELOAD="" /usr/bin/Xvfb -nolisten tcp -extension GLX -screen 0 1280x1024x24 :99 &
   LD_PRELOAD="" DISPLAY=:99 make -j6 -f client.mk profiledbuild MOZ_MAKE_FLAGS="$MAKEFLAGS"
   kill $! || true
 }
@@ -68,6 +74,9 @@ package() {
   #https://bugzilla.mozilla.org/show_bug.cgi?id=658850
   ln -sf firefox "$pkgdir/usr/lib/firefox/firefox-bin"
 }
+
+
+
 
 
 
